@@ -74,12 +74,17 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     
 elif text in times:
-        pair = users.get(update.effective_user.id, {}).get("pair", "EUR/USD (OTC)")
+        pair = users.get(update.effective_user.id, {}).get("pair", "EUR/USD 
+if "last_trade" not in users:
+                                                           if "last_trade" not in users:
+    users["last_trade"] = "PUT ⬇️"
 
-        trade = random.choice([
-            "CALL ⬆️",
-            "PUT ⬇️"
-        ])
+if users["last_trade"] == "CALL ⬆️":
+    trade = "PUT ⬇️"
+else:
+    trade = "CALL ⬆️"
+
+users["last_trade"] = trade
 
         signal = f"""
 🔥 SIGNAL READY 🔥
