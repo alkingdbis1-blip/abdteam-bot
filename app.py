@@ -72,15 +72,16 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
         )
 
-    elif text in times:
+    
+elif text in times:
         pair = users.get(update.effective_user.id, {}).get("pair", "EUR/USD (OTC)")
 
         trade = random.choice([
-    "CALL ⬆️",
-    "PUT ⬇️"
-])
+            "CALL ⬆️",
+            "PUT ⬇️"
+        ])
 
-signal = f"""
+        signal = f"""
 🔥 SIGNAL READY 🔥
 
 PAIR: {pair}
@@ -90,6 +91,7 @@ TRADE: {trade}
 
 🚀 GOOD LUCK 🚀
 """
+
         await update.message.reply_text(signal)
 
 def run_web():
@@ -110,8 +112,6 @@ def run_bot():
     print("ABDTEAM SIGNALS BOT RUNNING...")
     app.run_polling()
 
-if __name__ == "__main__":
-    threading.Thread(target=run_web, daemon=True).start()
     if __name__ == "__main__":
     threading.Thread(target=run_web, daemon=True).start()
     run_bot()
