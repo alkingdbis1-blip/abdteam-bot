@@ -88,6 +88,6 @@ def run_bot():
     print("ABDTEAM SIGNALS BOT RUNNING...")
     app.run_polling()
 
-if__name__=="__main__":
+:"__if__name__=="__main
     threading.Thread(target=run_web, daemon=True).start()
     run_bot()
