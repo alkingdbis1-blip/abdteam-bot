@@ -1,52 +1,25 @@
 import os
 import threading
 from flask import Flask
-
 from telegram import Update, ReplyKeyboardMarkup
-from telegram.ext import (
-    ApplicationBuilder,
-    CommandHandler,
-    MessageHandler,
-    filters,
-    ContextTypes,
-)
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
 TOKEN = "8395784175:AAEbCUtMNP892FjCk-o7Tn1CEIPCY4RFJfU"
 
-web = Flask(__name__)
+web = Flask(name)
 
 @web.route("/")
 def home():
     return "ABDTEAM BOT WORKING"
 
 pairs = [
-    "AUD/CHF (OTC)",
-    "USD/PHP (OTC)",
-    "GBP/NZD (OTC)",
-    "USD/BDT (OTC)",
-    "EUR/CAD (OTC)",
-    "USD/ARS (OTC)",
-    "USD/CHF (OTC)",
-    "GBP/JPY (OTC)",
-    "NZD/CAD (OTC)",
-    "EUR/CHF (OTC)",
-    "USD/COP (OTC)",
-    "USD/BRL (OTC)",
-    "EUR/GBP (OTC)",
-    "GBP/CAD (OTC)",
-    "GBP/USD (OTC)",
-    "NZD/JPY (OTC)",
-    "USD/EGP (OTC)",
-    "USD/JPY (OTC)",
-    "USD/PKR (OTC)",
-    "CAD/CHF (OTC)",
-    "USD/IDR (OTC)",
-    "EUR/AUD (OTC)",
-    "EUR/USD (OTC)",
-    "AUD/USD (OTC)",
-    "AUD/CAD (OTC)",
-    "AUD/JPY (OTC)",
-    "CHF/JPY (OTC)"
+    "AUD/CHF (OTC)", "USD/PHP (OTC)", "GBP/NZD (OTC)", "USD/BDT (OTC)",
+    "EUR/CAD (OTC)", "USD/ARS (OTC)", "USD/CHF (OTC)", "GBP/JPY (OTC)",
+    "NZD/CAD (OTC)", "EUR/CHF (OTC)", "USD/COP (OTC)", "USD/BRL (OTC)",
+    "EUR/GBP (OTC)", "GBP/CAD (OTC)", "GBP/USD (OTC)", "NZD/JPY (OTC)",
+    "USD/EGP (OTC)", "USD/JPY (OTC)", "USD/PKR (OTC)", "CAD/CHF (OTC)",
+    "USD/IDR (OTC)", "EUR/AUD (OTC)", "EUR/USD (OTC)", "AUD/USD (OTC)",
+    "AUD/CAD (OTC)", "AUD/JPY (OTC)", "CHF/JPY (OTC)"
 ]
 
 times = ["1 Minute", "2 Minutes", "5 Minutes"]
@@ -62,29 +35,33 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
+    user_id = update.effective_user.id
 
     if text in pairs:
-        users[update.effective_user.id] = {"pair": text}
-        keyboard = [[t] for t in times]
+        users[user_id] = {
+            "pair": text,
+            "last_trade": users.get(user_id, {}).get("last_trade", "PUT ⬇️")
+        }
 
+        keyboard = [[t] for t in times]
         await update.message.reply_text(
             "⏰ Choose Time ⏰",
             reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
         )
 
-    
-elif text in times:
-        pair = users.get(update.effective_user.id, {}).get("pair", "EUR/USD 
-if "last_trade" not in users:
-                                                           if "last_trade" not in users:
-    users["last_trade"] = "PUT ⬇️"
+    elif text in times:
+        if user_id not in users:
+            users[user_id] = {"pair": "EUR/USD (OTC)", "last_trade": "PUT ⬇️"}
 
-if users["last_trade"] == "CALL ⬆️":
-    trade = "PUT ⬇️"
-else:
-    trade = "CALL ⬆️"
+        pair = users[user_id].get("pair", "EUR/USD (OTC)")
+        last_trade = users[user_id].get("last_trade", "PUT ⬇️")
 
-users["last_trade"] = trade
+        if last_trade == "CALL ⬆️":
+            trade = "PUT ⬇️"
+        else:
+            trade = "CALL ⬆️"
+
+        users[user_id]["last_trade"] = trade
 
         signal = f"""
 🔥 SIGNAL READY 🔥
@@ -105,18 +82,12 @@ def run_web():
 
 def run_bot():
     app = ApplicationBuilder().token(TOKEN).build()
-
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(
-        MessageHandler(
-            filters.TEXT & ~filters.COMMAND,
-            handle_message
-        )
-    )
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
     print("ABDTEAM SIGNALS BOT RUNNING...")
     app.run_polling()
 
-    if __name__ == "__main__":
+if name == "main":
     threading.Thread(target=run_web, daemon=True).start()
     run_bot()
