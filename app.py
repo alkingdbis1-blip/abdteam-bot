@@ -1,3 +1,7 @@
+import os
+import threading
+from flask import Flask
+
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import (
     ApplicationBuilder,
@@ -8,6 +12,12 @@ from telegram.ext import (
 )
 
 TOKEN = "8395784175:AAEbCUtMNP892FjCk-o7Tn1CEIPCY4RFJfU"
+
+web = Flask(__name__)
+
+@web.route("/")
+def home():
+    return "ABDTEAM BOT WORKING"
 
 pairs = [
     "AUD/CHF (OTC)",
@@ -39,23 +49,15 @@ pairs = [
     "CHF/JPY (OTC)"
 ]
 
-times = [
-    "1 Minute",
-    "2 Minutes",
-    "5 Minutes"
-]
+times = ["1 Minute", "2 Minutes", "5 Minutes"]
 
 users = {}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[p] for p in pairs]
-
     await update.message.reply_text(
         "🔥 Choose Trading Pair 🔥",
-        reply_markup=ReplyKeyboardMarkup(
-            keyboard,
-            resize_keyboard=True
-        )
+        reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     )
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -63,22 +65,15 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if text in pairs:
         users[update.effective_user.id] = {"pair": text}
-
         keyboard = [[t] for t in times]
 
         await update.message.reply_text(
             "⏰ Choose Time ⏰",
-            reply_markup=ReplyKeyboardMarkup(
-                keyboard,
-                resize_keyboard=True
-            )
+            reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
         )
 
     elif text in times:
-        pair = users.get(update.effective_user.id, {}).get(
-            "pair",
-            "EUR/USD"
-        )
+        pair = users.get(update.effective_user.id, {}).get("pair", "EUR/USD (OTC)")
 
         signal = f"""
 🔥 SIGNAL READY 🔥
@@ -90,20 +85,26 @@ TRADE: CALL ⬆️
 
 🚀 GOOD LUCK 🚀
 """
-
         await update.message.reply_text(signal)
 
-app = ApplicationBuilder().token(TOKEN).build()
+def run_web():
+    port = int(os.environ.get("PORT", 10000))
+    web.run(host="0.0.0.0", port=port)
 
-app.add_handler(CommandHandler("start", start))
+def run_bot():
+    app = ApplicationBuilder().token(TOKEN).build()
 
-app.add_handler(
-    MessageHandler(
-        filters.TEXT & ~filters.COMMAND,
-        handle_message
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(
+        MessageHandler(
+            filters.TEXT & ~filters.COMMAND,
+            handle_message
+        )
     )
-)
 
-print("ABDTEAM SIGNALS BOT RUNNING...")
+    print("ABDTEAM SIGNALS BOT RUNNING...")
+    app.run_polling()
 
-app.run_polling()
+if __name__ == "__main__":
+    threading.Thread(target=run_web, daemon=True).start()
+    run_bot()
