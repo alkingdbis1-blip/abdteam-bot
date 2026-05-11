@@ -6,7 +6,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, fil
 
 TOKEN = "8395784175:AAEbCUtMNP892FjCk-o7Tn1CEIPCY4RFJfU"
 
-web = Flask(name)
+web = Flask(__name__)
 
 @web.route("/")
 def home():
