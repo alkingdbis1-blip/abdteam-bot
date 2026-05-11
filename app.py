@@ -75,13 +75,18 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif text in times:
         pair = users.get(update.effective_user.id, {}).get("pair", "EUR/USD (OTC)")
 
-        signal = f"""
+        trade = random.choice([
+    "CALL ⬆️",
+    "PUT ⬇️"
+])
+
+signal = f"""
 🔥 SIGNAL READY 🔥
 
 PAIR: {pair}
 TIME: {text}
 
-TRADE: CALL ⬆️
+TRADE: {trade}
 
 🚀 GOOD LUCK 🚀
 """
