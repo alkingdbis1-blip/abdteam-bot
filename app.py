@@ -1,5 +1,6 @@
 import os
 import threading
+import random
 from flask import Flask
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
@@ -56,10 +57,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         pair = users[user_id].get("pair", "EUR/USD (OTC)")
         last_trade = users[user_id].get("last_trade", "PUT ⬇️")
 
-        if last_trade == "CALL ⬆️":
-            trade = "PUT ⬇️"
-        else:
-            trade = "CALL ⬆️"
+        trade = random.choice(["CALL ⬆️", "PUT ⬇️"])
 
         users[user_id]["last_trade"] = trade
 
